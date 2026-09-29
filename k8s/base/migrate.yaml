@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrate
+  annotations:
+    # A fresh deployment applies Alembic migrations before the API begins
+    # serving useful traffic. The operation is idempotent on later applies.
+    civicpulse.io/purpose: database-migration-and-seed
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels:
+        app: migrate
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: migrate
+          image: civicpulse-backend:dev
+          command:
+            - /bin/sh
+            - -c
+            - >-
+              until alembic upgrade head; do
+                echo 'PostgreSQL is not ready; retrying migration in 5 seconds';
+                sleep 5;
+              done;
+              python -m scripts.seed
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: civicpulse-secrets
+                  key: POSTGRES_PASSWORD
+            - name: DATABASE_URL
+              value: postgresql+asyncpg://civicpulse:$(POSTGRES_PASSWORD)@postgres:5432/civicpulse
+            - name: REDIS_URL
+              value: redis://redis:6379/0
+          envFrom:
+            - configMapRef: { name: civicpulse-config }
+            - secretRef: { name: civicpulse-secrets }
+          resources:
+            requests: { cpu: 100m, memory: 192Mi }
+            limits: { cpu: 500m, memory: 384Mi }

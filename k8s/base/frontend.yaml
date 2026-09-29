@@ -32,7 +32,13 @@ spec:
               containerPort: 8080
           env:
             - name: API_UPSTREAM
-              value: backend:8000
+              # Nginx sends literal DNS queries, unlike a shell resolver, so
+              # use the fully qualified in-cluster Service name.
+              value: backend.civicpulse.svc.cluster.local:8000
+            - name: NGINX_RESOLVER
+              value: 10.96.0.10
+            - name: NGINX_ENVSUBST_FILTER
+              value: API_UPSTREAM|NGINX_RESOLVER
           resources:
             requests: { cpu: 50m, memory: 64Mi }
             limits: { cpu: 250m, memory: 128Mi }

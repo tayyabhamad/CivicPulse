@@ -80,7 +80,8 @@ services:
     image: civicpulse-frontend:local
     environment:
       API_UPSTREAM: backend:8000
-      NGINX_ENVSUBST_FILTER: API_UPSTREAM
+      NGINX_RESOLVER: 127.0.0.11
+      NGINX_ENVSUBST_FILTER: API_UPSTREAM|NGINX_RESOLVER
     depends_on:
       backend:
         condition: service_healthy

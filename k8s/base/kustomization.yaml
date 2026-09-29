@@ -7,6 +7,7 @@ resources:
   - secret.yaml
   - postgres.yaml
   - redis.yaml
+  - migrate.yaml
   - backend.yaml
   - frontend.yaml
   - ingress.yaml
