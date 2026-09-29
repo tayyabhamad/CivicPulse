@@ -2,7 +2,10 @@
 
 Municipal complaint intake, AI-assisted triage, and operations dashboard for **CS4032 — Software Construction and Design, Assignment 1**.
 
-> Status: Day 1 foundation in progress. The backend domain and triage layers are implemented and verified; PostgreSQL/Redis, frontend, containers, Kubernetes, and CI are next.
+> Status: Implementation complete on `dev`. The full application, Compose
+> stack, Kubernetes manifests, automated quality gates, and local Kubernetes
+> deployment have been exercised. See [evidence](docs/EVIDENCE.md) for the
+> verified results and the remaining human-submission items.
 
 ## Architecture
 
@@ -26,8 +29,11 @@ flowchart LR
 | Deterministic simulated triage | Implemented and tested |
 | Rule-based fallback | Implemented and tested |
 | OpenRouter adapter with validated JSON | Implemented; requires environment credentials |
-| Database, Redis, API routes | Foundation created; integration is in progress |
-| Frontend, Compose, Kubernetes, CI/CD | Planned |
+| Database, Redis, API routes | Implemented and exercised with seeded fixtures |
+| React operations dashboard | Implemented and browser-verified |
+| Docker Compose | Implemented and verified on native WSL Docker Engine |
+| Kubernetes / HPA / VPA manifests | Implemented; local kind deployment verified |
+| CI/CD | Implemented; latest workflow result is linked in evidence after completion |
 
 ## Local backend checks
 
@@ -81,3 +87,5 @@ clean checkout without a running backend. CI may override it with
 - [Project plan](docs/PROJECT-PLAN.md)
 - [Project charter](docs/PROJECT-CHARTER.md)
 - [AI-use disclosure](docs/AI-USAGE.md)
+- [Runbook](docs/RUNBOOK.md)
+- [Verification evidence and human checklist](docs/EVIDENCE.md)
