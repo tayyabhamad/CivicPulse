@@ -2,6 +2,10 @@
 
 Municipal complaint intake, AI-assisted triage, and operations dashboard for **CS4032 — Software Construction and Design, Assignment 1**.
 
+[![CI](https://github.com/tayyabhamad/CivicPulse/actions/workflows/ci.yml/badge.svg)](https://github.com/tayyabhamad/CivicPulse/actions/workflows/ci.yml)
+[![Python 3.11](https://img.shields.io/badge/python-3.11-blue)](backend/pyproject.toml)
+[![React](https://img.shields.io/badge/frontend-React-61dafb)](frontend/package.json)
+
 > Status: Implementation complete on `dev`. The full application, Compose
 > stack, Kubernetes manifests, automated quality gates, and local Kubernetes
 > deployment have been exercised. See [evidence](docs/EVIDENCE.md) for the
@@ -58,6 +62,20 @@ at `/api`; PostgreSQL and Redis intentionally have no host ports. See
 [container guidance](docs/CONTAINERS.md) for the development and production
 Compose profiles, data persistence, and verification commands.
 
+## API summary
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/complaints` | Create a complaint and obtain its triage result. |
+| `GET` | `/api/complaints` | List complaints with category, priority, status, and pagination filters. |
+| `GET` | `/api/complaints/{id}` | Retrieve one complaint. |
+| `PATCH` | `/api/complaints/{id}/status` | Apply a valid lifecycle transition. |
+| `GET` | `/api/stats` | Return dashboard aggregates with an `X-Cache` hit/miss header. |
+| `GET` | `/api/meta/providers` | Report provider state without exposing credentials. |
+| `GET` | `/health`, `/ready`, `/metrics` | Liveness, readiness, and Prometheus-style metrics. |
+
+The full versioned contract is [backend/openapi.json](backend/openapi.json).
+
 ## API contract workflow
 
 The checked-in [OpenAPI schema](backend/openapi.json) is the contract between
@@ -89,3 +107,4 @@ clean checkout without a running backend. CI may override it with
 - [AI-use disclosure](docs/AI-USAGE.md)
 - [Runbook](docs/RUNBOOK.md)
 - [Verification evidence and human checklist](docs/EVIDENCE.md)
+- [Final submission manifest](docs/SUBMISSION-MANIFEST.md)
