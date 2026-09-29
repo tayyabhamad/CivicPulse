@@ -50,10 +50,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: helm/kind-action@v1.12.0
+      - name: Load the immutable images into the smoke cluster
+        run: |
+          docker pull ghcr.io/${{ github.repository_owner }}/civicpulse-backend:${{ github.sha }}
+          docker pull ghcr.io/${{ github.repository_owner }}/civicpulse-frontend:${{ github.sha }}
+          kind load docker-image ghcr.io/${{ github.repository_owner }}/civicpulse-backend:${{ github.sha }}
+          kind load docker-image ghcr.io/${{ github.repository_owner }}/civicpulse-frontend:${{ github.sha }}
       - name: Deploy immutable SHA images to kind
         run: |
           cd k8s/overlays/prod
           kustomize edit set image civicpulse-backend=ghcr.io/${{ github.repository_owner }}/civicpulse-backend:${{ github.sha }}
           kustomize edit set image civicpulse-frontend=ghcr.io/${{ github.repository_owner }}/civicpulse-frontend:${{ github.sha }}
-          kubectl apply -k .
+          # The production overlay includes an optional VPA custom resource.
+          # A fresh kind cluster has no VPA CRD/controller, so apply the
+          # portable workload set here and validate the actual deployment.
+          kubectl apply -f ../../base/namespace.yaml
+          kubectl apply -f ../../base/configmap.yaml
+          kubectl apply -f ../../base/secret.yaml
+          kubectl apply -f ../../base/postgres.yaml
+          kubectl apply -f ../../base/redis.yaml
+          sed "s|civicpulse-backend:dev|ghcr.io/${{ github.repository_owner }}/civicpulse-backend:${{ github.sha }}|" ../../base/migrate.yaml | kubectl apply -f -
+          sed "s|civicpulse-backend:dev|ghcr.io/${{ github.repository_owner }}/civicpulse-backend:${{ github.sha }}|" ../../base/backend.yaml | kubectl apply -f -
+          sed "s|civicpulse-frontend:dev|ghcr.io/${{ github.repository_owner }}/civicpulse-frontend:${{ github.sha }}|" ../../base/frontend.yaml | kubectl apply -f -
+          kubectl apply -f ../../base/ingress.yaml
+          kubectl apply -f ../../base/hpa.yaml
+          kubectl apply -f ../../base/pdb.yaml
+          kubectl wait --for=condition=complete job/migrate -n civicpulse --timeout=180s
           kubectl rollout status deployment/backend -n civicpulse --timeout=180s
+          kubectl rollout status deployment/frontend -n civicpulse --timeout=180s
+          kubectl get pods,hpa -n civicpulse
