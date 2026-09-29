@@ -1,27 +1,30 @@
-# CivicPulse Runbook
+﻿# CivicPulse — RUNBOOK
+**Author:** Hamza Mahfooz | Updated: 2026-09-29
 
-## Local launch
+## Deploy
+```bash
+kubectl apply -k k8s/base/
+kubectl rollout status deployment/backend -n civicpulse
+```
 
-1. Install and start a Docker-compatible engine (Docker Desktop or native WSL Docker Engine).
-2. Copy `.env.example` to `.env`; add an OpenRouter key only if using `TRIAGE_PROVIDER=openrouter`.
-3. Run `docker compose up --build` and open `http://localhost:8080`.
-4. Stop with `docker compose down`; data persists in named volumes. Use `down -v` only when intentionally resetting data.
+## Rollback
+```bash
+kubectl rollout undo deployment/backend -n civicpulse
+kubectl rollout status deployment/backend -n civicpulse
+```
 
-## Triage incident
+## Read Logs
+```bash
+kubectl logs -n civicpulse -l app=backend --tail=100 -f
+```
 
-Set `TRIAGE_PROVIDER=rules` for immediate deterministic operation. The application already falls back to rules when OpenRouter times out, rate-limits, returns malformed output, or is misconfigured. Inspect JSON stdout logs by request ID and `/api/meta/providers`.
+## When Triage Fails
+1. Check rate limit: `kubectl exec -n civicpulse deploy/backend -- redis-cli GET "rl:triage:global"`
+2. Force rules mode: `kubectl set env deployment/backend TRIAGE_PROVIDER=rules -n civicpulse`
+3. Revert: `kubectl set env deployment/backend TRIAGE_PROVIDER=llm -n civicpulse`
 
-## Kubernetes
-
-Install metrics-server and an ingress controller, then apply `kubectl apply -k k8s/overlays/local`. Check `kubectl get pods,hpa -n civicpulse`. Roll back an unsafe release with `kubectl rollout undo deployment/backend -n civicpulse`; use the previous SHA overlay for the auditable declarative rollback.
-
-The local kind verification used native WSL Docker Engine and a Metrics Server
-configured for kind. The migration Job waits for PostgreSQL, applies Alembic
-migrations, and then seeds 32 fixtures before the dashboard is used.
-
-## Evidence still required
-
-Capture real screenshots/output for branch protection, failed/green merge,
-network isolation, HPA scaling, load chart, and rollback. Do not fabricate
-evidence. See [EVIDENCE.md](EVIDENCE.md) for the current verified baseline and
-the remaining evidence checklist.
+## Scale Manually
+```bash
+kubectl scale deployment/backend --replicas=4 -n civicpulse
+kubectl get hpa -n civicpulse -w
+```
