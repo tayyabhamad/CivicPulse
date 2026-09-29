@@ -34,6 +34,8 @@ REQUIRED_FILES = (
     "docs/PROJECT-CHARTER.md",
     "docs/CONTAINERS.md",
     "docs/ENGINEERING-NOTES.md",
+    "docs/EVIDENCE.md",
+    "docs/evidence/README.md",
     "docs/RUNBOOK.md",
     "docs/adr/001-triage-provider-boundary.md",
     "docs/adr/002-api-contract.md",
@@ -47,6 +49,8 @@ REQUIRED_FILES = (
 REQUIRED_MARKERS = {
     "README.md": ("Docker", "Kubernetes", "OpenRouter"),
     "docs/AI-USAGE.md": ("Codex", "Human responsibility"),
+    "docs/EVIDENCE.md": ("Verified technical baseline", "Student-team evidence still required"),
+    "docs/evidence/README.md": ("Capture checklist", "Do not fabricate evidence"),
     "compose.yaml": ("postgres", "redis", "frontend", "backend"),
     ".github/workflows/ci.yml": ("pytest", "npm run test", "trivy"),
 }
