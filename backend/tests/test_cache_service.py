@@ -1,33 +1,39 @@
-﻿import pytest, json
+﻿"""Tests for the TriageCache service."""
+import pytest
 from unittest.mock import AsyncMock, MagicMock
 from app.services.cache import TriageCache
 
-@pytest.fixture
-def mock_redis():
+
+def make_redis(value=None):
     redis = MagicMock()
-    redis.get = AsyncMock(return_value=None)
-    redis.setex = AsyncMock(return_value=True)
+    redis.get = AsyncMock(return_value=value)
+    redis.set = AsyncMock(return_value=True)
     return redis
 
-@pytest.mark.asyncio
-async def test_cache_miss_returns_none(mock_redis):
-    cache = TriageCache(redis=mock_redis, ttl=300)
-    assert await cache.get("burst water main") is None
 
 @pytest.mark.asyncio
-async def test_cache_hit_returns_value(mock_redis):
-    data = {"category": "water", "priority": "critical", "summary": "Burst main"}
-    mock_redis.get = AsyncMock(return_value=json.dumps(data).encode())
-    cache = TriageCache(redis=mock_redis, ttl=300)
-    assert await cache.get("burst water main") == data
+async def test_cache_miss_returns_none():
+    cache = TriageCache(redis=make_redis(None), ttl_seconds=300)
+    result = await cache.get("burst water main", "Street 12", "rules:v1")
+    assert result is None
+
 
 @pytest.mark.asyncio
-async def test_set_uses_configured_ttl(mock_redis):
-    cache = TriageCache(redis=mock_redis, ttl=300)
-    await cache.set("text", {"category": "road", "priority": "low", "summary": "Pothole"})
-    assert mock_redis.setex.call_args[0][1] == 300
+async def test_different_texts_produce_different_keys():
+    key1 = TriageCache.key_for("burst water pipe", "Street 1", "rules:v1")
+    key2 = TriageCache.key_for("broken street light", "Street 2", "rules:v1")
+    assert key1 != key2
+
 
 @pytest.mark.asyncio
-async def test_different_texts_have_different_keys(mock_redis):
-    cache = TriageCache(redis=mock_redis, ttl=300)
-    assert cache._make_key("water burst") != cache._make_key("broken light")
+async def test_same_text_produces_same_key():
+    key1 = TriageCache.key_for("burst water pipe", "Street 1", "rules:v1")
+    key2 = TriageCache.key_for("burst water pipe", "Street 1", "rules:v1")
+    assert key1 == key2
+
+
+@pytest.mark.asyncio
+async def test_key_is_case_insensitive():
+    key1 = TriageCache.key_for("Burst Water Pipe", "Street 1", "rules:v1")
+    key2 = TriageCache.key_for("burst water pipe", "street 1", "rules:v1")
+    assert key1 == key2

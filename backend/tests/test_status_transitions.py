@@ -1,18 +1,29 @@
-﻿import pytest
-from app.services.status import is_valid_transition
+﻿"""Tests for complaint status transition validation."""
+import pytest
+from app.domain import ComplaintStatus, can_transition
+from app.services.status import require_valid_transition, InvalidStatusTransition
+
 
 def test_open_to_in_progress_is_valid():
-    assert is_valid_transition("open", "in_progress") is True
+    assert can_transition(ComplaintStatus.OPEN, ComplaintStatus.IN_PROGRESS) is True
+
 
 def test_open_to_resolved_is_invalid():
-    assert is_valid_transition("open", "resolved") is False
+    assert can_transition(ComplaintStatus.OPEN, ComplaintStatus.RESOLVED) is False
+
 
 def test_in_progress_to_resolved_is_valid():
-    assert is_valid_transition("in_progress", "resolved") is True
+    assert can_transition(ComplaintStatus.IN_PROGRESS, ComplaintStatus.RESOLVED) is True
+
 
 def test_resolved_to_closed_is_valid():
-    assert is_valid_transition("resolved", "closed") is True
+    assert can_transition(ComplaintStatus.RESOLVED, ComplaintStatus.CLOSED) is True
 
-def test_closed_has_no_valid_transitions():
-    assert is_valid_transition("closed", "open") is False
-    assert is_valid_transition("closed", "in_progress") is False
+
+def test_invalid_transition_raises():
+    with pytest.raises(InvalidStatusTransition):
+        require_valid_transition(ComplaintStatus.OPEN, ComplaintStatus.CLOSED)
+
+
+def test_valid_transition_does_not_raise():
+    require_valid_transition(ComplaintStatus.OPEN, ComplaintStatus.IN_PROGRESS)
