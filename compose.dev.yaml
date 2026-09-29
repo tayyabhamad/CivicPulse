@@ -1,0 +1,9 @@
+# Optional local-development overlay: bind source code and expose the API for debugging.
+services:
+  backend:
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    volumes:
+      - ./backend/app:/app/app:ro
+      - ./backend/scripts:/app/scripts:ro
+    ports:
+      - "8000:8000"

@@ -1,0 +1,29 @@
+# Production overlay. Supply immutable registry image references in the environment.
+services:
+  migrate:
+    build: !reset null
+    image: ${BACKEND_IMAGE:?Set BACKEND_IMAGE to a SHA-tagged backend image}
+    restart: "no"
+  backend:
+    build: !reset null
+    image: ${BACKEND_IMAGE:?Set BACKEND_IMAGE to a SHA-tagged backend image}
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+  frontend:
+    build: !reset null
+    image: ${FRONTEND_IMAGE:?Set FRONTEND_IMAGE to a SHA-tagged frontend image}
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+    security_opt:
+      - no-new-privileges:true
+  postgres:
+    restart: unless-stopped
+  redis:
+    restart: unless-stopped
