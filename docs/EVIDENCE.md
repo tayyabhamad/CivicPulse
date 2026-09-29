@@ -33,6 +33,11 @@ submission if the instructor requires files in a folder.
 2. GitHub `dev` branch and Actions workflow state.
 3. Kubernetes-served CivicPulse dashboard at `http://127.0.0.1:18081/` with 32 seeded complaints.
 
+For the final submission, save verified files under
+[`docs/evidence/`](evidence/README.md) using the capture checklist. The
+checklist is intentionally explicit about which captures must be made by the
+two student contributors.
+
 ## Student-team evidence still required
 
 - A screen-recorded demo showing complaint submission, triage, filtering or
