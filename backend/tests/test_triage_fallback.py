@@ -1,4 +1,4 @@
-﻿"""Tests for the rules-based and simulated triage providers."""
+"""Tests for the rules-based and simulated triage providers."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-﻿"""Tests for the Redis-backed fixed-window rate limiter."""
+"""Tests for the Redis-backed fixed-window rate limiter."""
 
 from __future__ import annotations
 

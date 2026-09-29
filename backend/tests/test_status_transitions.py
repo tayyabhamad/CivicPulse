@@ -1,4 +1,4 @@
-﻿"""Tests for complaint status transition validation."""
+"""Tests for complaint status transition validation."""
 
 from __future__ import annotations
 
